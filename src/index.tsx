@@ -1,19 +1,21 @@
+import "primereact/resources/themes/lara-dark-indigo/theme.css";  //theme
+import "primereact/resources/primereact.min.css";                  //core css
+import "primeicons/primeicons.css";                                //icons
+import "primeflex/primeflex.css";
 import * as esbuild from 'esbuild-wasm';
 import ReactDOM from 'react-dom/client';
 import React, {useEffect, useRef, useState} from 'react'
 import {unpkgPathPlugin} from "./plugins/unpkg-path-plugin";
 import {fetchPlugin} from "./plugins/fetch-plugin";
 import CodeEditor from "./components/code-editor";
-import "primereact/resources/themes/lara-dark-indigo/theme.css";  //theme
-import "primereact/resources/primereact.min.css";                  //core css
-import "primeicons/primeicons.css";                                //icons
-import "primeflex/primeflex.css"
+import Preview from './components/preview';
+import {Button} from "primereact/button";
 
 const App = () => {
 
     const [input, setInput] = useState('');
+    const [code, setCode] = useState('');
     // const ref = useRef<any>();
-    const iframe = useRef<any>();
 
     const startService = async () => {
         await esbuild.initialize({
@@ -29,26 +31,12 @@ const App = () => {
         })();
     }, []);
 
-    const onClick = async (input: string) => {
-        // if (!ref.current) {
-        //     return;
-        // }
-        iframe.current.srcDoc = html;
+    const onChange = () => {
+    }
 
-        const result = await esbuild.build({
-            entryPoints: ['index.js'],
-            bundle: true,
-            write: false,
-            plugins: [
-                unpkgPathPlugin(),
-                fetchPlugin(input)
-            ],
-            define: {
-                global: 'window'
-            }
-        })
-        // setCode(result.outputFiles[0].text);
-        iframe.current.contentWindow.postMessage(result.outputFiles[0].text, '*');
+    const onClick = async () => {
+        const output = await bundle();
+        setCode(result.outputFiles[0].text);
     }
 
     const html = `
@@ -75,23 +63,11 @@ const App = () => {
         <div>
             <CodeEditor
                 initialValue={''}
-            ></CodeEditor>
-            <textarea
-                value={input}
-                onChange={(e) => {
-                    // onClick(e.target.value).then(() => null);
-                    setInput(e.target.value);
-                }}>
-            </textarea>
+                onChange={(value) => setInput(value)}/>
             <div>
-                {/*<button onClick={onClick}>Submit</button>*/}
+                {/*<Button onClick={onClick}>Submit</Button>*/}
             </div>
-            <iframe
-                title={'code preview'}
-                ref={iframe}
-                sandbox={'allow-scripts'}
-                srcDoc={html}>
-            </iframe>
+            <Preview code={code}/>code
         </div>
     );
 };

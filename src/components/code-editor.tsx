@@ -1,25 +1,45 @@
-import MonacoEditor, {OnMount} from "@monaco-editor/react";
+import './code-editor.css';
+import './syntax.css';
+import Editor, {OnMount} from "@monaco-editor/react";
 import React, {useRef} from "react";
 import prettier from "prettier";
 import parser from 'prettier/parser-babel';
 import {Button} from 'primereact/button';
-import './code-editor.css';
+import {parse} from '@babel/parser'
+import traverse from '@babel/traverse'
+import MonacoJSXHighlighter from 'monaco-jsx-highlighter';
 
 interface CodeEditorProps {
     initialValue: string;
+
+    onChange(value: string): void;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({initialValue}) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({initialValue, onChange}) => {
 
     const editorRef = useRef<any>(null);
-    const handleEditorDidMount: OnMount = (editor) => {
+    const onEditorDidMount: OnMount = (editor) => {
         editorRef.current = editor;
-        editor.focus();
-        editor.getModel()?.updateOptions({
-            tabSize: 2
+        editor.onDidChangeModelContent(() => {
+            // console.log(editor.getValue());
+            onChange(editor.getValue());
         });
-    };
 
+        editor.getModel()?.updateOptions({tabSize: 2});
+        // const highlighter = new MonacoJSXHighlighter(
+        //     // @ts-ignore
+        //     window.monaco, parse, traverse, editor)
+        //
+        // highlighter.highLightOnDidChangeModelContent(
+        //     () => {
+        //     },
+        //     () => {
+        //     },
+        //     undefined,
+        //     () => {
+        //     }
+        // );
+    };
     const onFormatClick = () => {
         // get current value from editor
         const unformatted = editorRef.current.getModel().getValue();
@@ -49,12 +69,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({initialValue}) => {
                     aria-label="Submit"
                 />
             </div>
-            <MonacoEditor
+            <Editor
                 className="relative h-full"
-                onMount={handleEditorDidMount}
+                onMount={onEditorDidMount}
                 value={initialValue}
                 theme="vs-dark"
-                language="javascript"
+                defaultLanguage="javascript"
                 height={'500px'}
                 options={{
                     wordWrap: 'on',
