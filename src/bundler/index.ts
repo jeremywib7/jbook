@@ -1,12 +1,8 @@
 import * as esbuild from "esbuild-wasm";
-import {unpkgPathPlugin} from "../plugins/unpkg-path-plugin";
-import {fetchPlugin} from "../plugins/fetch-plugin";
+import {unpkgPathPlugin} from "./plugins/unpkg-path-plugin";
+import {fetchPlugin} from "./plugins/fetch-plugin";
 
-export const bundle = async (rawCode: string) => {
-    await esbuild.initialize({
-        worker: true,
-        wasmURL: 'https://unpkg.com/esbuild-wasm@0.17.4/esbuild.wasm'
-    });
+const bundle = async (rawCode: string) => {
 
     const result = await esbuild.build({
         entryPoints: ['index.js'],
